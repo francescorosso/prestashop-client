@@ -2,15 +2,16 @@ package it.frared.prestashop.model;
 
 import java.util.List;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+@Getter
+@Setter
+@Accessors(chain = true)
+@NoArgsConstructor
 public class OrderCarriers {
 
 	private List<OrderCarrier> order_carriers;
-
-	public List<OrderCarrier> getOrder_carriers() {
-		return this.order_carriers;
-	}
-
-	public void setOrder_carriers(List<OrderCarrier> order_carriers) {
-		this.order_carriers = order_carriers;
-	}
 }

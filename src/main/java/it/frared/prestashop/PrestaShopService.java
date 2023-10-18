@@ -14,7 +14,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Query;
 
 public interface PrestaShopService {
-	
+
 	@GET("orders")
 	public Call<Orders> getOrdersByState(
 		@Query("io_format") String io_format,
@@ -25,13 +25,13 @@ public interface PrestaShopService {
 	public Call<Orders> getOrder(
 		@Query("io_format") String io_format,
 		@Query("display") String display,
-		@Query("filter[id]") String id);
+		@Query("filter[id]") int id);
 
 	@GET("order_carriers")
 	public Call<OrderCarriers> getOrderCarriers(
 		@Query("io_format") String io_format,
 		@Query("display") String display,
-		@Query("filter[id_order]") String id_order);
+		@Query("filter[id_order]") int id_order);
 
 	@Headers("Content-Type: application/xml")
 	@PUT("order_carriers")
@@ -42,7 +42,7 @@ public interface PrestaShopService {
 	public Call<OrderDetails> getOrderDetails(
 		@Query("io_format") String io_format,
 		@Query("display") String display,
-		@Query("filter[id_order]") String id_order);
+		@Query("filter[id_order]") int id_order);
 
 	@GET("customers")
 	public Call<Customers> getCustomer(

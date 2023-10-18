@@ -15,12 +15,14 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.2'
-
-	implementation 'org.slf4j:slf4j-api:2.0.7'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+	testCompile 'org.junit.jupiter:junit-jupiter-params:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+	implementation 'org.slf4j:slf4j-api:2.0.7'
 
 	implementation 'com.squareup.retrofit2:retrofit:2.9.0'
 	implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
@@ -28,4 +30,14 @@ dependencies {
 	implementation 'com.squareup.okhttp3:logging-interceptor:4.0.1'
 
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.3'
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+
+    maxHeapSize = '1G'
+
+    testLogging {
+        events "passed"
+    }
 }

@@ -1,8 +1,6 @@
 package it.frared.prestashop;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,8 +33,12 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 @Slf4j
 public class PrestaShopDAO {
 
+	private XmlMapper xmlMapper;
+	private PrestaShopService service;
+
 	public PrestaShopDAO(String apiUrl, String apiKey) {
-	XmlMapper xmlMapper = new XmlMapper();
+
+		xmlMapper = new XmlMapper();
 		xmlMapper.configure(SerializationFeature.INDENT_OUTPUT, false);
 		xmlMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
 		xmlMapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, false);
@@ -57,80 +59,105 @@ public class PrestaShopDAO {
 				.client(httpClient)
 				.build();
 
-		PrestaShopService service = retrofit.create(PrestaShopService.class);
+		service = retrofit.create(PrestaShopService.class);
+	}
 
+	public Order getOrder(int id) throws PrestashopServiceException {
 		try {
-			Response<Orders> Oresponse = service
-				.getOrder("JSON", Order.FIELDS, "6")
+			Response<Orders> response = service
+				.getOrder("JSON", Order.FIELDS, id)
 				.execute();
 
-			if (!Oresponse.isSuccessful()) {
-				throw new RuntimeException("Unable to retrieve Orders");
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Order " + id);
 			}
-			List<Order> orders = Oresponse.body().getOrders();
-			double totalWeight = 0;
-			for (Order order : orders) {
-				Response<OrderDetails> ODresponse = service
-					.getOrderDetails("JSON", OrderDetail.FIELDS, order.getId() + "")
-					.execute();
-				if (!ODresponse.isSuccessful()) {
-					throw new RuntimeException("Unable to retrieve OrderDetails for order " + order.getId());
-				}
-				List<OrderDetail> orderDetails = ODresponse.body().getOrder_details();
-				double weight = orderDetails.stream()
-					.mapToDouble(od -> Double.parseDouble(od.getProduct_weight()) * Integer.parseInt(od.getProduct_quantity()))
-					.sum();
-				weight = new BigDecimal(weight).setScale(2, RoundingMode.HALF_UP).doubleValue();
-				totalWeight += weight;
 
-				Response<OrderCarriers> OCresponse = service
-					.getOrderCarriers("JSON", OrderCarrier.FIELDS, order.getId() + "")
-					.execute();
-				if (!ODresponse.isSuccessful()) {
-					throw new RuntimeException("Unable to retrieve OrderCarriers for order " + order.getId());
-				}
-				List<OrderCarrier> orderCarriers = OCresponse.body().getOrder_carriers();
-				String trackingNumber = "";
-				if (orderCarriers != null && orderCarriers.size() > 0) {
-					OrderCarrier orderCarrier = orderCarriers.get(0);
-					trackingNumber = orderCarrier.getTracking_number();
-					orderCarrier.setTracking_number("NEWTRACK");
-
-					String xmlString = xmlMapper
-						.writer()
-						.writeValueAsString(orderCarrier);
-					xmlString = "<prestashop>" + xmlString + "</prestashop>";
-					RequestBody requestBody = RequestBody.create(xmlString, MediaType.parse("application/xml"));
-
-					Response<Void> Uresponse = service
-						.updateOrderCarrier(requestBody)
-						.execute();
-					if (!Uresponse.isSuccessful()) {
-						log.debug("error: {}", Uresponse.errorBody().string());
-						throw new RuntimeException(xmlString);
-					}
-				}
-				Response<Customers> Cresponse = service
-					.getCustomer("JSON", Customer.FIELDS, order.getId_customer() + "")
-					.execute();
-				if (!Cresponse.isSuccessful()) {
-					throw new RuntimeException("Unable to retrieve Customer for order " + order.getId());
-				}
-				Customer customer = Cresponse.body().getCustomers().get(0);
-
-				Response<Addresses> Aresponse = service
-					.getAddress("JSON", Address.FIELDS, order.getId_address_delivery() + "")
-					.execute();
-				if (!Aresponse.isSuccessful()) {
-					throw new RuntimeException("Unable to retrieve delivery Address for order " + order.getId());
-				}
-				Address deliveryAddress = Aresponse.body().getAddresses().get(0);
-
-				log.debug("Order {} to {} {} ({}): {} kg - tracking {}", order.getId(), deliveryAddress.getLastname(), deliveryAddress.getFirstname(), customer.getEmail(), weight, trackingNumber);
-			}
-			log.info("{} orders {} kg", orders.size(), totalWeight);
+			return response.body().getOrders().get(0);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new PrestashopServiceException("", e);
+		}
+	}
+
+	public List<OrderDetail> getOrderDetails(int id) throws PrestashopServiceException {
+		try {
+			Response<OrderDetails> response = service
+				.getOrderDetails("JSON", OrderDetail.FIELDS, id)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve OrderDetails for order " + id);
+			}
+
+			return response.body().getOrder_details();
+		} catch (Exception e) {
+			throw new PrestashopServiceException("", e);
+		}
+	}
+
+	public List<OrderCarrier> getOrderCarriers(int id) throws PrestashopServiceException {
+		try {
+			Response<OrderCarriers> response = service
+				.getOrderCarriers("JSON", OrderCarrier.FIELDS, id)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve OrderCarriers for order " + id);
+			}
+
+			return response.body().getOrder_carriers();
+		} catch (Exception e) {
+			throw new PrestashopServiceException("", e);
+		}
+	}
+
+	public void setOrderCarrier(OrderCarrier orderCarrier) throws PrestashopServiceException {
+		try {
+			String xmlString = xmlMapper
+				.writer()
+				.writeValueAsString(orderCarrier);
+			xmlString = "<prestashop>" + xmlString + "</prestashop>";
+			RequestBody requestBody = RequestBody.create(xmlString, MediaType.parse("application/xml"));
+
+			Response<Void> Uresponse = service
+				.updateOrderCarrier(requestBody)
+				.execute();
+			if (!Uresponse.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to update OrderCarrier: " + xmlString);
+			}
+		} catch (Exception e) {
+			throw new PrestashopServiceException("", e);
+		}
+	}
+
+	public Customer getCustomer(String id) throws PrestashopServiceException {
+		try {
+			Response<Customers> response = service
+				.getCustomer("JSON", Customer.FIELDS, id)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Customer " + id);
+			}
+
+			return response.body().getCustomers().get(0);
+		} catch (Exception e) {
+			throw new PrestashopServiceException("", e);
+		}
+	}
+
+	public Address getAddress(String id) throws PrestashopServiceException {
+		try {
+			Response<Addresses> response = service
+				.getAddress("JSON", Address.FIELDS, id)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new RuntimeException("Unable to retrieve Address " + id);
+			}
+
+			return response.body().getAddresses().get(0);
+		} catch (Exception e) {
+			throw new PrestashopServiceException("", e);
 		}
 	}
 }
