@@ -13,15 +13,13 @@ import lombok.experimental.Accessors;
 @Setter
 @Accessors(chain = true)
 @NoArgsConstructor
-public class OrderCarrier {
+public class OrderHistory {
 
-	public static final String FIELDS = "[id,id_order,id_carrier,weight,tracking_number,date_add]";
-
+	public static final String FIELDS = "[id,id_order,id_order_state,date_add]";
+	
 	private int id;
-	private String id_order;
-	private String id_carrier;
-	private String weight;
-	private String tracking_number;
+	private int id_order;
+	private int id_order_state;
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime date_add;
 }
