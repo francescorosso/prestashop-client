@@ -89,11 +89,14 @@ public class PrestaShopDAO {
 
 			return response.body().getOrders().get(0);
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to retrieve Order " + id, e);
 		}
 	}
 
 	public Order getOrderByReference(String reference) throws PrestashopServiceException {
+
+		log.debug("looking for order by reference {}", reference);
+
 		try {
 			Response<Orders> response = service
 				.getOrderByReference("JSON", Order.FIELDS, reference)
@@ -105,7 +108,7 @@ public class PrestaShopDAO {
 
 			return response.body().getOrders().get(0);
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to retrieve Order with reference " + reference, e);
 		}
 	}
 
@@ -121,7 +124,7 @@ public class PrestaShopDAO {
 
 			return response.body().getOrder_details();
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to retrieve OrderDetails for order " + id, e);
 		}
 	}
 
@@ -137,7 +140,7 @@ public class PrestaShopDAO {
 
 			return response.body().getOrder_carriers();
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to retrieve OrderCarriers for order " + id, e);
 		}
 	}
 
@@ -165,10 +168,10 @@ public class PrestaShopDAO {
 				.updateOrderCarrier(requestBody)
 				.execute();
 			if (!Uresponse.isSuccessful()) {
-				throw new PrestashopServiceException("Unable to update OrderCarrier: " + xmlString);
+				throw new PrestashopServiceException("Unable to update OrderCarrier for Order " + id);
 			}
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to update OrderCarrier for Order " + id, e);
 		}
 	}
 
@@ -187,7 +190,7 @@ public class PrestaShopDAO {
 				.sorted(Comparator.comparing(OrderHistory::getDate_add).reversed())
 				.collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to retrieve OrderHistories for order " + id, e);
 		}
 	}
 
@@ -216,10 +219,10 @@ public class PrestaShopDAO {
 				.insertOrderHistory(requestBody)
 				.execute();
 			if (!Uresponse.isSuccessful()) {
-				throw new PrestashopServiceException("Unable to update OrderCarrier: " + xmlString);
+				throw new PrestashopServiceException("Unable to update OrderHistory for Order " + id);
 			}
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to update OrderHistory for Order " + id, e);
 		}
 	}
 
@@ -235,7 +238,7 @@ public class PrestaShopDAO {
 
 			return response.body().getCustomers().get(0);
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to retrieve Customer " + id, e);
 		}
 	}
 
@@ -251,7 +254,7 @@ public class PrestaShopDAO {
 
 			return response.body().getAddresses().get(0);
 		} catch (Exception e) {
-			throw new PrestashopServiceException("", e);
+			throw new PrestashopServiceException("Unable to retrieve Address " + id, e);
 		}
 	}
 }
