@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class Order {
 
-	public static final String FIELDS = "[id,current_state,id_customer,id_carrier,id_address_delivery,id_address_invoice,reference,chiave_gestionale]";
+	public static final String FIELDS = "[id,current_state,id_customer,id_carrier,id_address_delivery,id_address_invoice,reference,chiave_gestionale,tipo_ordine]";
 
 	private int id;
 	private String id_address_delivery;
@@ -21,4 +21,5 @@ public class Order {
 	private String current_state;
 	private String reference;
 	private String chiave_gestionale;
+	private String tipo_ordine;
 }

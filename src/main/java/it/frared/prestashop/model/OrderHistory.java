@@ -19,7 +19,7 @@ public class OrderHistory {
 	
 	private int id;
 	private int id_order;
-	private int id_order_state;
+	private String id_order_state;
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime date_add;
 }

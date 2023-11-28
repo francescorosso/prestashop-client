@@ -11,10 +11,11 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class Address {
 
-	public static final String FIELDS = "[id,id_customer,lastname,firstname,dni,address1,address2,postcode,city,id_state,phone,phone_mobile,other]";
+	public static final String FIELDS = "[id,id_customer,lastname,firstname,dni,address1,address2,postcode,city,id_country,id_state,phone,phone_mobile,other]";
 
 	private int id;
 	private String id_customer;
+	private String id_country;
 	private String id_state;
 	private String lastname;
 	private String firstname;

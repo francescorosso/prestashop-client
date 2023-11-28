@@ -20,7 +20,7 @@ public class OrderCarrier {
 	private int id;
 	private String id_order;
 	private String id_carrier;
-	private String weight;
+	private double weight;
 	private String tracking_number;
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime date_add;

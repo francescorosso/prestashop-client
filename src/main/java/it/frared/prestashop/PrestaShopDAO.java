@@ -1,11 +1,14 @@
 package it.frared.prestashop;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -24,6 +27,10 @@ import it.frared.prestashop.model.OrderHistories;
 import it.frared.prestashop.model.OrderHistory;
 import it.frared.prestashop.model.OrderHistoryRequest;
 import it.frared.prestashop.model.Orders;
+import it.frared.prestashop.model.Product;
+import it.frared.prestashop.model.Products;
+import it.frared.prestashop.model.State;
+import it.frared.prestashop.model.States;
 import it.frared.prestashop.model.OrderCarrierRequest;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Authenticator;
@@ -40,16 +47,19 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @Slf4j
 public class PrestaShopDAO {
-
-	private PrestaShopService service;
+	
 	private ObjectMapper jsonMapper;
 	private XmlMapper xmlMapper;
+
+	private PrestaShopService service;
 
 	public PrestaShopDAO(String apiUrl, String apiKey) {
 
 		jsonMapper = new ObjectMapper()
 			.registerModule(new JavaTimeModule())
-			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 
 		xmlMapper = XmlMapper.builder()
 			.defaultUseWrapper(false)
@@ -75,6 +85,50 @@ public class PrestaShopDAO {
 			.build();
 
 		service = retrofit.create(PrestaShopService.class);
+	}
+
+	public Product getProduct(int id) throws PrestashopServiceException {
+		try {
+			Response<Products> response = service
+				.getProduct("JSON", Product.FIELDS, id)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Product " + id);
+			}
+
+			return response.body().getProducts().get(0);
+		} catch (Exception e) {
+			throw new PrestashopServiceException("Unable to retrieve Product " + id, e);
+		}
+	}
+
+	public List<Order> getOrdersByState(String state) throws PrestashopServiceException {
+		try {
+			Response<Orders> response = service
+				.getOrdersByState("JSON", Order.FIELDS, state)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Orders with state " + state);
+			}
+
+			if (response.body() == null) {
+				return new ArrayList<>();
+			}
+
+			return response.body().getOrders();
+		} catch (Exception e) {
+			throw new PrestashopServiceException("Unable to retrieve Orders with state " + state, e);
+		}
+	}
+
+	public List<Order> getOrdersByState(String... states) throws PrestashopServiceException {
+		List<Order> orders = new ArrayList<>();
+		for (String orderStatus : states) {
+			orders.addAll(this.getOrdersByState(orderStatus));
+		}
+		return orders;
 	}
 
 	public Order getOrder(int id) throws PrestashopServiceException {
@@ -194,11 +248,16 @@ public class PrestaShopDAO {
 		}
 	}
 
-	public void setOrderHistory(int id, int id_state) throws PrestashopServiceException {
-		List<OrderCarrier> orderCarriers = this.getOrderCarriers(id);
+	public void setOrderHistory(int id, String id_state) throws PrestashopServiceException {
+		Order order = this.getOrder(id);
+		if (order == null) {
+			log.warn("Order {} not found", id);
+			return;
+		}
 
-		if (orderCarriers.size() == 0) {
-
+		if (Objects.equals(order.getCurrent_state(), id_state)) {
+			log.debug("Order {} is already in state {}", id, id_state);
+			return;
 		}
 
 		OrderHistoryRequest request = new OrderHistoryRequest()
@@ -255,6 +314,22 @@ public class PrestaShopDAO {
 			return response.body().getAddresses().get(0);
 		} catch (Exception e) {
 			throw new PrestashopServiceException("Unable to retrieve Address " + id, e);
+		}
+	}
+
+	public State getState(String id) throws PrestashopServiceException {
+		try {
+			Response<States> response = service
+				.getState("JSON", State.FIELDS, id)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new RuntimeException("Unable to retrieve State " + id);
+			}
+
+			return response.body().getStates().get(0);
+		} catch (Exception e) {
+			throw new PrestashopServiceException("Unable to retrieve State " + id, e);
 		}
 	}
 }
