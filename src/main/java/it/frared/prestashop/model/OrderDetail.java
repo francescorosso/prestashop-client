@@ -14,9 +14,9 @@ public class OrderDetail {
 	public static final String FIELDS = "[id,id_order,product_id,product_reference,product_weight,product_quantity]";
 
 	private int id;
-	private String id_order;
-	private String product_id;
-	private String product_quantity;
+	private int id_order;
+	private int product_id;
+	private int product_quantity;
 	private String product_reference;
 	private String product_weight;
 }

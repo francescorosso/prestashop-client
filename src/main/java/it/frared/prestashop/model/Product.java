@@ -22,5 +22,5 @@ public class Product {
 	private String reference;
 	private String chiave_gestionale;
 	private String type;
-	private ProductAssociation associations;
+	private ProductAssociations associations;
 }

@@ -9,8 +9,12 @@ import lombok.experimental.Accessors;
 @Setter
 @Accessors(chain = true)
 @NoArgsConstructor
-public class ProductBundle {
-	
+public class Carrier {
+
+	public static final String FIELDS = "full";
+
 	private int id;
-	private int quantity;
+	private String name;
+	private String carrier_code;
+	private String chiave_gestionale;
 }

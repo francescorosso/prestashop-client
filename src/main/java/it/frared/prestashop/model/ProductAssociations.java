@@ -1,5 +1,7 @@
 package it.frared.prestashop.model;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,8 +11,7 @@ import lombok.experimental.Accessors;
 @Setter
 @Accessors(chain = true)
 @NoArgsConstructor
-public class ProductBundle {
+public class ProductAssociations {
 	
-	private int id;
-	private int quantity;
+	private List<ProductBundle> product_bundle;
 }

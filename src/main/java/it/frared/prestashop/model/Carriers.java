@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 @Setter
 @Accessors(chain = true)
 @NoArgsConstructor
-public class ProductAssociation {
+public class Carriers {
 	
-	private List<ProductBundle> product_bundle;
+	private List<Carrier> carriers;
 }

@@ -1,6 +1,7 @@
 package it.frared.prestashop;
 
 import it.frared.prestashop.model.Addresses;
+import it.frared.prestashop.model.Carriers;
 import it.frared.prestashop.model.Customers;
 import it.frared.prestashop.model.OrderCarriers;
 import it.frared.prestashop.model.OrderDetails;
@@ -21,6 +22,12 @@ public interface PrestaShopService {
 
 	@GET("products")
 	public Call<Products> getProduct(
+		@Query("io_format") String io_format,
+		@Query("display") String display,
+		@Query("filter[id]") int id);
+
+	@GET("carriers")
+	public Call<Carriers> getCarrier(
 		@Query("io_format") String io_format,
 		@Query("display") String display,
 		@Query("filter[id]") int id);

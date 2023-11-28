@@ -16,6 +16,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import it.frared.prestashop.model.Address;
 import it.frared.prestashop.model.Addresses;
+import it.frared.prestashop.model.Carrier;
+import it.frared.prestashop.model.Carriers;
 import it.frared.prestashop.model.Customer;
 import it.frared.prestashop.model.Customers;
 import it.frared.prestashop.model.Order;
@@ -98,6 +100,22 @@ public class PrestaShopDAO {
 			}
 
 			return response.body().getProducts().get(0);
+		} catch (Exception e) {
+			throw new PrestashopServiceException("Unable to retrieve Product " + id, e);
+		}
+	}
+
+	public Carrier getCarrier(int id) throws PrestashopServiceException {
+		try {
+			Response<Carriers> response = service
+				.getCarrier("JSON", Carrier.FIELDS, id)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Product " + id);
+			}
+
+			return response.body().getCarriers().get(0);
 		} catch (Exception e) {
 			throw new PrestashopServiceException("Unable to retrieve Product " + id, e);
 		}
