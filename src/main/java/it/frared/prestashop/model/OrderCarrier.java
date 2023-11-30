@@ -24,4 +24,7 @@ public class OrderCarrier {
 	private String tracking_number;
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime date_add;
+
+	private int numero_colli = 1;
+	private String numero_distinta;
 }

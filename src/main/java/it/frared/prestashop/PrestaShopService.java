@@ -82,13 +82,13 @@ public interface PrestaShopService {
 	public Call<Customers> getCustomer(
 		@Query("io_format") String io_format,
 		@Query("display") String display,
-		@Query("filter[id]") String id);
+		@Query("filter[id]") int id);
 
 	@GET("addresses")
 	public Call<Addresses> getAddress(
 		@Query("io_format") String io_format,
 		@Query("display") String display,
-		@Query("filter[id]") String id);
+		@Query("filter[id]") int id);
 
 	@GET("states")
 	public Call<States> getState(

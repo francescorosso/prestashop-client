@@ -303,7 +303,7 @@ public class PrestaShopDAO {
 		}
 	}
 
-	public Customer getCustomer(String id) throws PrestashopServiceException {
+	public Customer getCustomer(int id) throws PrestashopServiceException {
 		try {
 			Response<Customers> response = service
 				.getCustomer("JSON", Customer.FIELDS, id)
@@ -319,7 +319,7 @@ public class PrestaShopDAO {
 		}
 	}
 
-	public Address getAddress(String id) throws PrestashopServiceException {
+	public Address getAddress(int id) throws PrestashopServiceException {
 		try {
 			Response<Addresses> response = service
 				.getAddress("JSON", Address.FIELDS, id)
