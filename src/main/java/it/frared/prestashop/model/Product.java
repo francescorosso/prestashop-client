@@ -1,5 +1,7 @@
 package it.frared.prestashop.model;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,4 +25,6 @@ public class Product {
 	private String chiave_gestionale;
 	private String type;
 	private ProductAssociations associations;
+
+	private List<KeyValuePair> name;
 }
