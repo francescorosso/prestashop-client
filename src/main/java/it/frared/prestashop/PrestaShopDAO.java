@@ -167,7 +167,7 @@ public class PrestaShopDAO {
 
 	public Order getOrderByReference(String reference) throws PrestashopServiceException {
 
-		log.debug("looking for order by reference {}", reference);
+		logger.debug("looking for order by reference {}", reference);
 
 		try {
 			Response<Orders> response = service
@@ -200,50 +200,62 @@ public class PrestaShopDAO {
 		}
 	}
 
-	public List<OrderCarrier> getOrderCarriers(int id) throws PrestashopServiceException {
+	public List<OrderCarrier> getOrderCarriers(int id_order) throws PrestashopServiceException {
 		try {
 			Response<OrderCarriers> response = service
-				.getOrderCarriers("JSON", OrderCarrier.FIELDS, id)
+				.getOrderCarriers("JSON", OrderCarrier.FIELDS, id_order)
 				.execute();
 
 			if (!response.isSuccessful()) {
-				throw new PrestashopServiceException("Unable to retrieve OrderCarriers for order " + id);
+				throw new PrestashopServiceException("Unable to retrieve OrderCarriers for order " + id_order);
 			}
 
 			return response.body().getOrder_carriers();
 		} catch (Exception e) {
-			throw new PrestashopServiceException("Unable to retrieve OrderCarriers for order " + id, e);
+			throw new PrestashopServiceException("Unable to retrieve OrderCarriers for order " + id_order, e);
 		}
 	}
 
-	public void setTrackingNumber(int id, String trackingNumber) throws PrestashopServiceException {
-		List<OrderCarrier> orderCarriers = this.getOrderCarriers(id);
+	public OrderCarrier getOrderCarrier(int id) throws PrestashopServiceException {
+		try {
+			Response<OrderCarriers> response = service
+				.getOrderCarrier("JSON", OrderCarrier.FIELDS, id)
+				.execute();
 
-		if (orderCarriers.size() == 0) {
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve OrderCarrier " + id);
+			}
 
+			return response.body().getOrder_carriers().get(0);
+		} catch (Exception e) {
+			throw new PrestashopServiceException("Unable to retrieve OrderCarrier " + id, e);
 		}
+	}
+
+	public void setOrderCarrier(OrderCarrier orderCarrier) throws PrestashopServiceException {
+
+		//OrderCarrier orderCarrier = this.getOrderCarrier(orderCarrier.getId());
 
 		OrderCarrierRequest request = new OrderCarrierRequest()
-			.setOrder_carrier(orderCarriers.get(0)
-								.setTracking_number(trackingNumber));
+			.setOrder_carrier(orderCarrier);
 
 		try {
 			String xmlString = xmlMapper
 				.writer()
 				.writeValueAsString(request);
 
-			log.trace("request body: {}", xmlString);
+			logger.trace("request body: {}", xmlString);
 
 			RequestBody requestBody = RequestBody.create(xmlString, MediaType.parse("application/xml"));
 
-			Response<Void> Uresponse = service
+			Response<Void> response = service
 				.updateOrderCarrier(requestBody)
 				.execute();
-			if (!Uresponse.isSuccessful()) {
-				throw new PrestashopServiceException("Unable to update OrderCarrier for Order " + id);
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to update OrderCarrier " + orderCarrier.getId());
 			}
 		} catch (Exception e) {
-			throw new PrestashopServiceException("Unable to update OrderCarrier for Order " + id, e);
+			throw new PrestashopServiceException("Unable to update OrderCarrier " + orderCarrier.getId(), e);
 		}
 	}
 
@@ -269,12 +281,12 @@ public class PrestaShopDAO {
 	public void setOrderHistory(int id, String id_state) throws PrestashopServiceException {
 		Order order = this.getOrder(id);
 		if (order == null) {
-			log.warn("Order {} not found", id);
+			logger.warn("Order {} not found", id);
 			return;
 		}
 
 		if (Objects.equals(order.getCurrent_state(), id_state)) {
-			log.debug("Order {} is already in state {}", id, id_state);
+			logger.debug("Order {} is already in state {}", id, id_state);
 			return;
 		}
 
@@ -288,7 +300,7 @@ public class PrestaShopDAO {
 				.writer()
 				.writeValueAsString(request);
 
-			log.trace("request body: {}", xmlString);
+			logger.trace("request body: {}", xmlString);
 
 			RequestBody requestBody = RequestBody.create(xmlString, MediaType.parse("application/xml"));
 

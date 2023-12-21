@@ -1,6 +1,6 @@
 package it.frared.prestashop;
 
-public class PrestashopServiceException extends Exception {
+public class PrestashopServiceException extends RuntimeException {
 
 	public PrestashopServiceException(String message) {
 		super(message);

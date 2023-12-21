@@ -56,6 +56,12 @@ public interface PrestaShopService {
 		@Query("display") String display,
 		@Query("filter[id_order]") int id_order);
 
+	@GET("order_carriers")
+	public Call<OrderCarriers> getOrderCarrier(
+		@Query("io_format") String io_format,
+		@Query("display") String display,
+		@Query("filter[id]") int id);
+
 	@Headers("Content-Type: application/xml")
 	@PUT("order_carriers")
 	public Call<Void> updateOrderCarrier(
