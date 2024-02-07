@@ -50,6 +50,13 @@ public interface PrestaShopService {
 		@Query("display") String display,
 		@Query("filter[reference]") String reference);
 
+	@GET("orders")
+	public Call<Orders> getOrderByChiaveGestionale(
+		@Query("io_format") String io_format,
+		@Query("display") String display,
+		@Query("filter[tipo_ordine]") String tipoOrdine,
+		@Query("filter[chiave_gestionale]") String chiaveGestionale);
+
 	@GET("order_carriers")
 	public Call<OrderCarriers> getOrderCarriers(
 		@Query("io_format") String io_format,

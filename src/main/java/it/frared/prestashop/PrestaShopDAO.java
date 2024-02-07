@@ -184,6 +184,25 @@ public class PrestaShopDAO {
 		}
 	}
 
+	public Order getOrderByChiaveGestionale(String tipoOrdine, String chiaveGestionale) throws PrestashopServiceException {
+
+		logger.debug("looking for order by chiaveGestionale {}", chiaveGestionale);
+
+		try {
+			Response<Orders> response = service
+				.getOrderByChiaveGestionale("JSON", Order.FIELDS, tipoOrdine, chiaveGestionale)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Order with chiaveGestionale " + chiaveGestionale);
+			}
+
+			return response.body().getOrders().get(0);
+		} catch (Exception e) {
+			throw new PrestashopServiceException("Unable to retrieve Order with chiaveGestionale " + chiaveGestionale, e);
+		}
+	}
+
 	public List<OrderDetail> getOrderDetails(int id) throws PrestashopServiceException {
 		try {
 			Response<OrderDetails> response = service
