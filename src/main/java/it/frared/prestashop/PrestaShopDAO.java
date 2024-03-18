@@ -121,6 +121,26 @@ public class PrestaShopDAO {
 		}
 	}
 
+	public List<Order> getOrders() throws PrestashopServiceException {
+		try {
+			Response<Orders> response = service
+				.getOrders("JSON", Order.FIELDS)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Orders");
+			}
+
+			if (response.body() == null) {
+				return new ArrayList<>();
+			}
+
+			return response.body().getOrders();
+		} catch (Exception e) {
+			throw new PrestashopServiceException("Unable to retrieve Orders", e);
+		}
+	}
+
 	public List<Order> getOrdersByState(String state) throws PrestashopServiceException {
 		try {
 			Response<Orders> response = service

@@ -33,6 +33,11 @@ public interface PrestaShopService {
 		@Query("filter[id]") int id);
 
 	@GET("orders")
+	public Call<Orders> getOrders(
+		@Query("io_format") String io_format,
+		@Query("display") String display);
+
+	@GET("orders")
 	public Call<Orders> getOrdersByState(
 		@Query("io_format") String io_format,
 		@Query("display") String display,
