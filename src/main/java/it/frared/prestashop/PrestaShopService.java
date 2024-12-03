@@ -3,6 +3,7 @@ package it.frared.prestashop;
 import it.frared.prestashop.model.Addresses;
 import it.frared.prestashop.model.Carriers;
 import it.frared.prestashop.model.Customers;
+import it.frared.prestashop.model.Messages;
 import it.frared.prestashop.model.OrderCarriers;
 import it.frared.prestashop.model.OrderDetails;
 import it.frared.prestashop.model.OrderHistories;
@@ -95,6 +96,13 @@ public interface PrestaShopService {
 		@Query("io_format") String io_format,
 		@Query("display") String display,
 		@Query("filter[id_order]") int id_order);
+
+	@GET("messages")
+	public Call<Messages> getOrderMessages(
+		@Query("io_format") String io_format,
+		@Query("display") String display,
+		@Query("filter[id_order]") int id_order,
+		@Query("filter[private]") int visible);
 
 	@GET("customers")
 	public Call<Customers> getCustomer(

@@ -2,6 +2,7 @@ package it.frared.prestashop;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +21,8 @@ import it.frared.prestashop.model.Carrier;
 import it.frared.prestashop.model.Carriers;
 import it.frared.prestashop.model.Customer;
 import it.frared.prestashop.model.Customers;
+import it.frared.prestashop.model.Message;
+import it.frared.prestashop.model.Messages;
 import it.frared.prestashop.model.Order;
 import it.frared.prestashop.model.OrderCarrier;
 import it.frared.prestashop.model.OrderCarriers;
@@ -351,6 +354,30 @@ public class PrestaShopDAO {
 			}
 		} catch (Exception e) {
 			throw new PrestashopServiceException("Unable to update OrderHistory for Order " + id, e);
+		}
+	}
+
+	public List<Message> getOrderMessages(int id_order) throws PrestashopServiceException {
+		try {
+			Response<Messages> response = service
+				.getOrderMessages("JSON", Message.FIELDS, id_order, 0)
+				.execute();
+
+			if (!response.isSuccessful()) {
+				throw new PrestashopServiceException("Unable to retrieve Messages for order " + id_order);
+			}
+
+			if (response.body() == null) {
+				return Collections.emptyList();
+			}
+
+			return response.body().getMessages()
+				.stream()
+				.sorted(Comparator.comparing(Message::getDate_add).reversed())
+				.collect(Collectors.toList());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new PrestashopServiceException("Unable to retrieve Messages for order " + id_order, e);
 		}
 	}
 
