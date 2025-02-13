@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ import it.frared.prestashop.model.OrderDetails;
 import it.frared.prestashop.model.OrderHistories;
 import it.frared.prestashop.model.OrderHistory;
 import it.frared.prestashop.model.OrderHistoryRequest;
+import it.frared.prestashop.model.OrderStatus;
 import it.frared.prestashop.model.Orders;
 import it.frared.prestashop.model.Product;
 import it.frared.prestashop.model.Products;
@@ -51,22 +53,24 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @Slf4j
-public class PrestaShopDAO {
+public abstract class PrestaShopDAO {
 	
 	private ObjectMapper jsonMapper;
 	private XmlMapper xmlMapper;
 
 	private PrestaShopService service;
 
-	public PrestaShopDAO(String apiUrl, String apiKey) {
+	private Map<OrderStatus, String> statuses;
 
-		jsonMapper = new ObjectMapper()
+	public PrestaShopDAO(String apiUrl, String apiKey, Map<OrderStatus, String> statuses) {
+
+		this.jsonMapper = new ObjectMapper()
 			.registerModule(new JavaTimeModule())
 			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 			.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 
-		xmlMapper = XmlMapper.builder()
+		this.xmlMapper = XmlMapper.builder()
 			.defaultUseWrapper(false)
 			.serializationInclusion(JsonInclude.Include.NON_DEFAULT)
 			.addModule(new JavaTimeModule())
@@ -89,7 +93,9 @@ public class PrestaShopDAO {
 			.client(httpClient)
 			.build();
 
-		service = retrofit.create(PrestaShopService.class);
+		this.service = retrofit.create(PrestaShopService.class);
+
+		this.statuses = statuses;
 	}
 
 	public Product getProduct(int id) throws PrestashopServiceException {
@@ -144,14 +150,14 @@ public class PrestaShopDAO {
 		}
 	}
 
-	public List<Order> getOrdersByState(String state) throws PrestashopServiceException {
+	public List<Order> getOrdersByState(OrderStatus status) throws PrestashopServiceException {
 		try {
 			Response<Orders> response = service
-				.getOrdersByState("JSON", Order.FIELDS, state)
+				.getOrdersByState("JSON", Order.FIELDS, statuses.get(status))
 				.execute();
 
 			if (!response.isSuccessful()) {
-				throw new PrestashopServiceException("Unable to retrieve Orders with state " + state);
+				throw new PrestashopServiceException("Unable to retrieve Orders with state " + status);
 			}
 
 			if (response.body() == null) {
@@ -160,14 +166,14 @@ public class PrestaShopDAO {
 
 			return response.body().getOrders();
 		} catch (Exception e) {
-			throw new PrestashopServiceException("Unable to retrieve Orders with state " + state, e);
+			throw new PrestashopServiceException("Unable to retrieve Orders with state " + status, e);
 		}
 	}
 
-	public List<Order> getOrdersByState(String... states) throws PrestashopServiceException {
+	public List<Order> getOrdersByState(OrderStatus... statuses) throws PrestashopServiceException {
 		List<Order> orders = new ArrayList<>();
-		for (String orderStatus : states) {
-			orders.addAll(this.getOrdersByState(orderStatus));
+		for (OrderStatus status : statuses) {
+			orders.addAll(this.getOrdersByState(status));
 		}
 		return orders;
 	}
@@ -320,22 +326,22 @@ public class PrestaShopDAO {
 		}
 	}
 
-	public void setOrderHistory(int id, String id_state) throws PrestashopServiceException {
+	public void setOrderHistory(int id, OrderStatus status) throws PrestashopServiceException {
 		Order order = this.getOrder(id);
 		if (order == null) {
 			logger.warn("Order {} not found", id);
 			return;
 		}
 
-		if (Objects.equals(order.getCurrent_state(), id_state)) {
-			logger.debug("Order {} is already in state {}", id, id_state);
+		if (Objects.equals(order.getCurrent_state(), statuses.get(status))) {
+			logger.debug("Order {} is already in state {}", id, status);
 			return;
 		}
 
 		OrderHistoryRequest request = new OrderHistoryRequest()
 			.setOrder_history(new OrderHistory()
 								.setId_order(id)
-								.setId_order_state(id_state));
+								.setId_order_state(statuses.get(status)));
 
 		try {
 			String xmlString = xmlMapper

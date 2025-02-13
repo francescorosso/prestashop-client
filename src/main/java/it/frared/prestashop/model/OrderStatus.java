@@ -1,11 +1,21 @@
 package it.frared.prestashop.model;
 
-public class OrderStatus {
+public enum OrderStatus {
 
-	public static final String PAGAMENTO_ACCETTATO = "2";
-	public static final String PREPARAZIONE_IN_CORSO = "3";
-	public static final String SPEDITO = "4";
-	public static final String CONSEGNATO = "5";
-	public static final String ANNULLATO = "6";
-	public static final String IN_ATTESA_ACQUISIZIONE = "19";
+	PAGAMENTO_ACCETTATO,
+	PREPARAZIONE_IN_CORSO,
+	SPEDITO,
+	CONSEGNATO,
+	ANNULLATO,
+	IN_ATTESA_ACQUISIZIONE,
+	INVIATO_A_GESTIONALE,
+	ERRORE_INVIO_GESTIONALE,
+	INDIRIZZO_NON_VALIDO,
+	IN_ATTESA_RITIRO,
+	SPEDIZIONE_IN_ERRORE,
+	RITIRATO_IN_SEDE,
+	IN_TRANSITO,
+	FATTURA_NON_CONTABILIZZATA,
+	FATTURA_NON_EMESSA,
+	ORDINE_GESTIONALE_NON_TROVATO;
 }
