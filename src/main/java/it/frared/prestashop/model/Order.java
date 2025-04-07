@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Order {
 
-	public static final String FIELDS = "[id,current_state,id_customer,id_carrier,id_address_delivery,id_address_invoice,reference,chiave_gestionale,tipo_ordine]";
+	public static final String FIELDS = "[id,current_state,id_customer,id_carrier,id_address_delivery,id_address_invoice,reference,chiave_gestionale,tipo_ordine,payment,total_paid]";
 
 	private int id;
 	private int id_address_delivery;
@@ -20,4 +20,6 @@ public class Order {
 	private String reference;
 	private String tipo_ordine;
 	private int chiave_gestionale;
+	private String payment;
+	private double total_paid;
 }
